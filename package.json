@@ -1,0 +1,37 @@
+{
+  "name": "fjes",
+  "version": "1.0.0",
+  "description": "Variant fjes",
+  "main": "index.html",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "bun run index.html --hot",
+    "build:watch": "tsc --watch",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@tweakpane/core": "^2.0.5",
+    "@types/bun": "latest",
+    "tweakpane": "^4.0.5"
+  },
+  "keywords": [
+    "typescript",
+    "javascript"
+  ],
+  "dependencies": {
+    "animejs": "4.3.6"
+  },
+  "private": true,
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
