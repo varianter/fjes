@@ -16,7 +16,8 @@
   "scripts": {
     "dev": "bun run index.html --hot",
     "build:watch": "tsc --watch",
-    "build": "tsc"
+    "build": "tsc",
+    "build:docs": "bun build ./index.html --outdir=dist/site --minify"
   },
   "devDependencies": {
     "@tweakpane/core": "^2.0.5",
