@@ -29,8 +29,10 @@ const shapeTypeOptions: Array<{ text: string; value: Shape["type"] }> = [
   { text: "Dot", value: "dot" },
   { text: "Curve", value: "curve" },
   { text: "Wave", value: "wave" },
-  { text: "Smile", value: "smile" },
+  { text: "U shape", value: "ushape" },
   { text: "Triangle", value: "triangle" },
+  { text: "L shape", value: "lshape" },
+  { text: "D shape", value: "dshape" },
 ];
 
 const positionOpts = {
@@ -60,7 +62,7 @@ function addShapeBindings(folder: FolderApi, shape: Shape) {
       break;
     case "circle":
       folder.addBinding(shape, "radius", { min: 1, max: 25 });
-      folder.addBinding(shape, "filled");
+      folder.addBinding(shape, "strokeWidth", { min: 1, max: 20 });
       break;
     case "dot":
       folder.addBinding(shape, "size", { min: 1, max: 20 });
@@ -75,13 +77,32 @@ function addShapeBindings(folder: FolderApi, shape: Shape) {
       folder.addBinding(shape, "amplitude", { min: 1, max: 20 });
       folder.addBinding(shape, "frequency", { min: 1, max: 5, step: 1 });
       break;
-    case "smile":
+    case "ushape":
       folder.addBinding(shape, "width", { min: 1, max: 80 });
       folder.addBinding(shape, "height", { min: 1, max: 40 });
       folder.addBinding(shape, "inverted");
       break;
     case "triangle":
       folder.addBinding(shape, "size", { min: 1, max: 20 });
+      break;
+    case "lshape":
+      folder.addBinding(shape, "width", { min: 1, max: 30 });
+      folder.addBinding(shape, "height", { min: 1, max: 30 });
+      folder.addBinding(shape, "mirrored");
+      folder.addBinding(shape, "rotate", {
+        min: 0,
+        max: 360,
+        format: (v: number) => v.toFixed(0),
+      });
+      break;
+    case "dshape":
+      folder.addBinding(shape, "width", { min: 1, max: 30 });
+      folder.addBinding(shape, "depth", { min: 1, max: 30 });
+      folder.addBinding(shape, "rotate", {
+        min: 0,
+        max: 360,
+        format: (v: number) => v.toFixed(0),
+      });
       break;
   }
 }
@@ -114,15 +135,6 @@ function buildLayerFolder(
     }
 
     addShapeBindings(layerFolder, group.layers[layerIndex]!);
-
-    if (group.layers.length > 1) {
-      layerFolder.addButton({ title: "Remove Layer" }).on("click", () => {
-        group.layers.splice(layerIndex, 1);
-        rebuildAll();
-        render();
-        syncConfigToUrl(config);
-      });
-    }
   }
 
   buildSettings();
@@ -163,18 +175,13 @@ function buildGroupFolder(group: Group, groupIndex: number): FolderApi {
   mirrorFolder.addBinding(group, "distance", { min: 0, max: 100 });
   mirrorFolder.addBinding(group, "blink");
 
+  // Depth (parallax intensity)
+  folder.addBinding(group, "depth", { min: 0, max: 5, step: 0.5 });
+
   // Layers
   for (let i = 0; i < group.layers.length; i++) {
     buildLayerFolder(folder, group, i);
   }
-
-  // Add layer button
-  folder.addButton({ title: "+ Add Layer" }).on("click", () => {
-    group.layers.push(structuredClone(shapeDefaults.dot));
-    rebuildAll();
-    render();
-    syncConfigToUrl(config);
-  });
 
   // Remove group button
   if (config.groups.length > 1) {
@@ -198,6 +205,7 @@ addGroupButton.on("click", () => {
     mirrored: false,
     distance: 0,
     blink: false,
+    depth: 2,
     layers: [structuredClone(shapeDefaults.dot)],
   });
   rebuildAll();

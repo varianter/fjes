@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fjes App</title>
     <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
       body {
+        margin: 0;
         display: grid;
         place-content: center;
         min-height: 100vh;
@@ -38,22 +44,21 @@
         gap: 0.5rem;
       }
 
-      .presets a {
+      .button {
         padding: 0.5rem 1rem;
         background: #ffd02f;
         color: #282828;
         text-decoration: none;
         border-radius: 0.25rem;
         transition: background 0.2s;
+        appearance: none;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        border: none;
       }
 
       .presets a:hover {
         background: #ffc700;
-      }
-
-      button {
-        padding: 0.5rem 1rem;
-        cursor: pointer;
       }
     </style>
   </head>
@@ -63,15 +68,15 @@
       <fjes-fjes></fjes-fjes>
     </mouse-tracker>
     <div class="controls">
+      <a class="button" href="/">Reset</a>
       <button
+        class="button"
         onclick="document.querySelector('fjes-fjes').toggleAttribute('debug')"
       >
-        debug
-      </button>
-      <button onclick="document.querySelector('fjes-fjes').animateMouth()">
-        animate
+        Debug
       </button>
       <button
+        class="button"
         onclick="
           navigator.clipboard
             .writeText(window.location.href)
@@ -82,33 +87,12 @@
       </button>
     </div>
 
-    <div class="presets">
+    <div class="presets" hidden>
       <h3>Saved Faces</h3>
       <p>Click to load a preset face configuration:</p>
       <ul>
         <li>
-          <a
-            href="#eyJncm91cHMiOlt7Im5hbWUiOiJFeWVzIiwicG9zaXRpb24iOnsieSI6LTEwLCJ4IjowfSwibWlycm9yZWQiOnRydWUsImRpc3RhbmNlIjoyNCwiYmxpbmsiOnRydWUsImxheWVycyI6W3sidHlwZSI6ImxpbmUiLCJsZW5ndGgiOjEwLCJyb3RhdGUiOjB9XX0seyJuYW1lIjoiTm9zZSIsInBvc2l0aW9uIjp7InkiOjAsIngiOjZ9LCJtaXJyb3JlZCI6ZmFsc2UsImRpc3RhbmNlIjowLCJibGluayI6ZmFsc2UsImxheWVycyI6W3sidHlwZSI6ImxpbmUiLCJsZW5ndGgiOjE1LCJyb3RhdGUiOjB9XX0seyJuYW1lIjoiTW91dGgiLCJwb3NpdGlvbiI6eyJ5IjoxNSwieCI6MH0sIm1pcnJvcmVkIjpmYWxzZSwiZGlzdGFuY2UiOjAsImJsaW5rIjpmYWxzZSwibGF5ZXJzIjpbeyJ0eXBlIjoic21pbGUiLCJ3aWR0aCI6NDAsImhlaWdodCI6MTUsImludmVydGVkIjpmYWxzZX1dfV19"
-            >Default</a
-          >
-        </li>
-        <li>
-          <a
-            href="#eyJncm91cHMiOlt7Im5hbWUiOiJFeWVzIiwicG9zaXRpb24iOnsieSI6LTEwLCJ4IjowfSwibWlycm9yZWQiOnRydWUsImRpc3RhbmNlIjoyNCwiYmxpbmsiOnRydWUsImxheWVycyI6W3sidHlwZSI6ImNpcmNsZSIsInJhZGl1cyI6NiwiZmlsbGVkIjp0cnVlfV19LHsibmFtZSI6Ik5vc2UiLCJwb3NpdGlvbiI6eyJ5IjowLCJ4IjowfSwibWlycm9yZWQiOmZhbHNlLCJkaXN0YW5jZSI6MCwiYmxpbmsiOmZhbHNlLCJsYXllcnMiOlt7InR5cGUiOiJ0cmlhbmdsZSIsInNpemUiOjh9XX0seyJuYW1lIjoiTW91dGgiLCJwb3NpdGlvbiI6eyJ5IjoxNSwieCI6MH0sIm1pcnJvcmVkIjpmYWxzZSwiZGlzdGFuY2UiOjAsImJsaW5rIjpmYWxzZSwibGF5ZXJzIjpbeyJ0eXBlIjoic21pbGUiLCJ3aWR0aCI6MzAsImhlaWdodCI6MTAsImludmVydGVkIjpmYWxzZX1dfV19"
-            >Happy</a
-          >
-        </li>
-        <li>
-          <a
-            href="#eyJncm91cHMiOlt7Im5hbWUiOiJFeWVzIiwicG9zaXRpb24iOnsieSI6LTEwLCJ4IjowfSwibWlycm9yZWQiOnRydWUsImRpc3RhbmNlIjoyNCwiYmxpbmsiOmZhbHNlLCJsYXllcnMiOlt7InR5cGUiOiJkb3QiLCJzaXplIjo0fV19LHsibmFtZSI6Ik1vdXRoIiwicG9zaXRpb24iOnsieSI6MTUsIngiOjB9LCJtaXJyb3JlZCI6ZmFsc2UsImRpc3RhbmNlIjowLCJibGluayI6ZmFsc2UsImxheWVycyI6W3sidHlwZSI6InNtaWxlIiwid2lkdGgiOjQwLCJoZWlnaHQiOjE1LCJpbnZlcnRlZCI6dHJ1ZX1dfV19"
-            >Sad</a
-          >
-        </li>
-        <li>
-          <a
-            href="#eyJncm91cHMiOlt7Im5hbWUiOiJFeWVzIiwicG9zaXRpb24iOnsieSI6LTEwLCJ4IjowfSwibWlycm9yZWQiOnRydWUsImRpc3RhbmNlIjoyNCwiYmxpbmsiOnRydWUsImxheWVycyI6W3sidHlwZSI6ImNpcmNsZSIsInJhZGl1cyI6OCwiZmlsbGVkIjpmYWxzZX0seyJ0eXBlIjoiY2lyY2xlIiwicmFkaXVzIjozLCJmaWxsZWQiOnRydWV9XX0seyJuYW1lIjoiTm9zZSIsInBvc2l0aW9uIjp7InkiOjAsIngiOjB9LCJtaXJyb3JlZCI6ZmFsc2UsImRpc3RhbmNlIjowLCJibGluayI6ZmFsc2UsImxheWVycyI6W3sidHlwZSI6ImRvdCIsInNpemUiOjN9XX0seyJuYW1lIjoiTW91dGgiLCJwb3NpdGlvbiI6eyJ5IjoxNSwieCI6MH0sIm1pcnJvcmVkIjpmYWxzZSwiZGlzdGFuY2UiOjAsImJsaW5rIjpmYWxzZSwibGF5ZXJzIjpbeyJ0eXBlIjoid2F2ZSIsIndpZHRoIjo0MCwiYW1wbGl0dWRlIjo1LCJmcmVxdWVuY3kiOjJ9XX1dfQ=="
-            >Wavy</a
-          >
+          <a href="/">Default</a>
         </li>
       </ul>
       <p>

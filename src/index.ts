@@ -17,18 +17,24 @@ export const config: Config = configFromUrl ?? structuredClone(defaultConfig);
 const sheet = new CSSStyleSheet();
 
 sheet.replaceSync(/*css*/ `
-  :host { display: inline-block; }
-
-  :host{
+  :host {
+    display: inline-block;
     --depth: 1.5;
     --scale-down: 0.3;
     transform:
+      perspective(800px)
       rotateY(calc(atan2(var(--mouse-x) * var(--scale-down), var(--depth))))
       rotateX(calc(atan2(var(--mouse-y) * (var(--scale-down) * -1), var(--depth))));
+    /*transition: transform 0.15s ease-out;*/
   }
 
   :host([debug]) {
     transform: none;
+  }
+
+  @keyframes breathe {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50%      { transform: translateY(-2px) scale(1.005); }
   }
 
   svg.fjes {
@@ -37,6 +43,7 @@ sheet.replaceSync(/*css*/ `
     background: #FFD02F;
     color: #282828;
     border-radius: 1rem;
+    animation: breathe 4s ease-in-out infinite;
   }
 
   /* Universal shape styles */
@@ -73,7 +80,7 @@ sheet.replaceSync(/*css*/ `
       calc(var(--mouse-x) * var(--offset, 2px)),
       calc(var(--mouse-y) * var(--offset, 2px))
     );
-    --offset: 2px;
+    /*transition: transform 0.2s ease-out;*/
   }
 
   :host([debug]) .group {

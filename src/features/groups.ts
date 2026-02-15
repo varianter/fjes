@@ -9,6 +9,7 @@ export type Group = {
   mirrored: boolean;
   distance: number;
   blink: boolean;
+  depth: number;
   layers: Shape[];
 };
 
@@ -26,15 +27,19 @@ export const defaultConfig: Config = {
       mirrored: true,
       distance: 24,
       blink: true,
+      depth: 2,
       layers: [{ type: "line", length: 10, rotate: 0 }],
     },
     {
       name: "Nose",
-      position: { x: 6, y: 0 },
+      position: { x: 0, y: 0 },
       mirrored: false,
       distance: 0,
       blink: false,
-      layers: [{ type: "line", length: 15, rotate: 0 }],
+      depth: 4,
+      layers: [
+        { type: "lshape", width: 5, height: 15, mirrored: true, rotate: 0 },
+      ],
     },
     {
       name: "Mouth",
@@ -42,7 +47,8 @@ export const defaultConfig: Config = {
       mirrored: false,
       distance: 0,
       blink: false,
-      layers: [{ type: "smile", width: 40, height: 15, inverted: false }],
+      depth: 3,
+      layers: [{ type: "ushape", width: 40, height: 15, inverted: false }],
     },
   ],
 };
@@ -52,10 +58,11 @@ export const defaultConfig: Config = {
 export function renderGroup(group: Group): string {
   const shapesMarkup = group.layers.map(renderShape).join("\n");
   const blinkClass = group.blink ? "blink" : "";
+  const depthStyle = `--offset: ${group.depth}px`;
 
   if (group.mirrored) {
     return `
-      <g class="group">
+      <g class="group" style="${depthStyle}">
         <g transform="translate(${group.position.x} ${group.position.y})">
           <g class="${blinkClass}" transform="translate(${-group.distance / 2} 0)">
             ${shapesMarkup}
@@ -68,7 +75,7 @@ export function renderGroup(group: Group): string {
   }
 
   return `
-    <g class="group">
+    <g class="group" style="${depthStyle}">
       <g transform="translate(${group.position.x} ${group.position.y})">
         ${shapesMarkup}
       </g>
