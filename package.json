@@ -14,7 +14,7 @@
     "dist"
   ],
   "scripts": {
-    "dev": "bun run index.html --hot",
+    "dev": "bun run --hot --port=1337 index.html",
     "build:watch": "tsc --watch",
     "build": "tsc",
     "build:docs": "bun build ./index.html --outdir=dist/site --minify"
