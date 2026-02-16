@@ -155,7 +155,7 @@ function buildLayerFolder(
 function buildGroupFolder(group: Group, groupIndex: number): FolderApi {
   const folder = pane.addFolder({
     title: group.name,
-    expanded: true,
+    expanded: false,
   });
 
   // Editable name
