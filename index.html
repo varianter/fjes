@@ -22,29 +22,16 @@
         margin-top: 1rem;
         display: flex;
         gap: 0.5rem;
-      }
-
-      .presets {
-        margin-top: 2rem;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
         padding: 1rem;
-        border: 1px solid #ccc;
-        border-radius: 0.5rem;
-        max-width: 600px;
-      }
-
-      .presets h3 {
-        margin-top: 0;
-      }
-
-      .presets ul {
-        list-style: none;
-        padding: 0;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
       }
 
       .button {
+        font: inherit;
         padding: 0.5rem 1rem;
         background: #ffd02f;
         color: #282828;
@@ -57,7 +44,7 @@
         border: none;
       }
 
-      .presets a:hover {
+      .button:hover {
         background: #ffc700;
       }
     </style>
@@ -68,7 +55,8 @@
       <fjes-fjes></fjes-fjes>
     </mouse-tracker>
     <div class="controls">
-      <a class="button" href="/">Reset</a>
+      <p>Use panels on the right to customize</p>
+      <a class="button" href="#">Reset</a>
       <button
         class="button"
         onclick="document.querySelector('fjes-fjes').toggleAttribute('debug')"
@@ -83,24 +71,19 @@
             .then(() => alert('Link copied!'))
         "
       >
-        📋 Copy link
+        Copy link
       </button>
-    </div>
-
-    <div class="presets" hidden>
-      <h3>Saved Faces</h3>
-      <p>Click to load a preset face configuration:</p>
-      <ul>
-        <li>
-          <a href="/">Default</a>
-        </li>
-      </ul>
-      <p>
-        <small
-          >💡 Tip: Adjust the face using the controls, then click "Copy link" to
-          share your creation!</small
-        >
-      </p>
+      <button
+        class="button"
+        onclick="
+          const svgString = document.querySelector('fjes-fjes').getSvgString();
+          navigator.clipboard
+            .writeText(svgString)
+            .then(() => alert('SVG copied to clipboard!'));
+        "
+      >
+        Copy as SVG
+      </button>
     </div>
 
     <script type="module" src="src/mouse-tracker.ts"></script>

@@ -143,6 +143,17 @@ class FjesElement extends HTMLElement {
 
     this.root.innerHTML = /*html*/ `
     <svg class="fjes" viewBox="-${HALF} -${HALF} ${FACE_SIZE} ${FACE_SIZE}" width="200" height="200">
+      <defs>
+        <style>
+        .shape {
+          stroke-width: 5px;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+          stroke: currentColor;
+          fill: none;
+        }
+        </style>
+      </defs>
       ${renderAllGroups(currentConfig)}
       <g class="helpers">
         <line x1="-${HALF}" y1="0" x2="${HALF}" y2="0" stroke="red" stroke-width="0.5" />
@@ -154,6 +165,18 @@ class FjesElement extends HTMLElement {
 
   connectedCallback() {
     this.render(config);
+  }
+
+  getSvgString(): string {
+    const svgElement = this.root.querySelector("svg.fjes");
+    if (!svgElement) {
+      throw new Error("SVG element not found");
+    }
+    // Clone the SVG to avoid modifying the original
+    const clone = svgElement.cloneNode(true) as SVGElement;
+    // Optionally remove debug helpers
+    clone.querySelector(".helpers")?.remove();
+    return clone.outerHTML;
   }
 }
 
