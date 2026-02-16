@@ -1,16 +1,18 @@
 import type { Point } from "./types";
 import { renderShape, type Shape } from "./shapes";
 
-// --- A group is a named, positioned collection of shape layers ---
+// --- A group is a named, positioned, rotated shape ---
+// Position and rotate are spatial transforms that apply universally to any shape.
 
 export type Group = {
   name: string;
   position: Point;
+  rotate: number;
   mirrored: boolean;
   distance: number;
   blink: boolean;
   depth: number;
-  layers: Shape[];
+  shape: Shape;
 };
 
 export type Config = {
@@ -24,31 +26,32 @@ export const defaultConfig: Config = {
     {
       name: "Eyes",
       position: { x: 0, y: -10 },
+      rotate: 0,
       mirrored: true,
       distance: 24,
       blink: true,
       depth: 2,
-      layers: [{ type: "line", length: 10, rotate: 0 }],
+      shape: { type: "line", length: 10 },
     },
     {
       name: "Nose",
       position: { x: 0, y: 0 },
+      rotate: 0,
       mirrored: false,
       distance: 0,
       blink: false,
       depth: 4,
-      layers: [
-        { type: "lshape", width: 5, height: 15, mirrored: true, rotate: 0 },
-      ],
+      shape: { type: "lshape", width: -5, height: 15 },
     },
     {
       name: "Mouth",
       position: { x: 0, y: 15 },
+      rotate: 0,
       mirrored: false,
       distance: 0,
       blink: false,
       depth: 3,
-      layers: [{ type: "ushape", width: 40, height: 15, inverted: false }],
+      shape: { type: "ushape", width: 40, height: 15, inverted: false },
     },
   ],
 };
@@ -56,19 +59,20 @@ export const defaultConfig: Config = {
 // --- Renders a single group (with optional mirroring + blink) ---
 
 export function renderGroup(group: Group): string {
-  const shapesMarkup = group.layers.map(renderShape).join("\n");
+  const shapeMarkup = renderShape(group.shape);
   const blinkClass = group.blink ? "blink" : "";
   const depthStyle = `--offset: ${group.depth}px`;
+  const rotateTransform = group.rotate ? ` rotate(${group.rotate})` : "";
 
   if (group.mirrored) {
     return `
       <g class="group" style="${depthStyle}">
-        <g transform="translate(${group.position.x} ${group.position.y})">
+        <g transform="translate(${group.position.x} ${group.position.y})${rotateTransform}">
           <g class="${blinkClass}" transform="translate(${-group.distance / 2} 0)">
-            ${shapesMarkup}
+            ${shapeMarkup}
           </g>
           <g class="${blinkClass}" transform="translate(${group.distance / 2} 0) scale(-1, 1)">
-            ${shapesMarkup}
+            ${shapeMarkup}
           </g>
         </g>
       </g>`;
@@ -76,8 +80,8 @@ export function renderGroup(group: Group): string {
 
   return `
     <g class="group" style="${depthStyle}">
-      <g transform="translate(${group.position.x} ${group.position.y})">
-        ${shapesMarkup}
+      <g transform="translate(${group.position.x} ${group.position.y})${rotateTransform}">
+        ${shapeMarkup}
       </g>
     </g>`;
 }

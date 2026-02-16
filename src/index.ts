@@ -127,17 +127,15 @@ class FjesElement extends HTMLElement {
     // Collect curve control points for debug helpers
     const curveHelpers: string[] = [];
     for (const group of currentConfig.groups) {
-      for (const layer of group.layers) {
-        if (layer.type === "curve") {
-          curveHelpers.push(
-            helperDot(layer.start, "start"),
-            helperDot(layer.end, "end"),
-            helperDot(layer.q1, "q1"),
-            helperDot(layer.q2, "q2"),
-            helperDot(layer.q3, "q3"),
-            helperDot(layer.q4, "q4"),
-          );
-        }
+      if (group.shape.type === "curve") {
+        curveHelpers.push(
+          helperDot(group.shape.start, "start"),
+          helperDot(group.shape.end, "end"),
+          helperDot(group.shape.q1, "q1"),
+          helperDot(group.shape.q2, "q2"),
+          helperDot(group.shape.q3, "q3"),
+          helperDot(group.shape.q4, "q4"),
+        );
       }
     }
 

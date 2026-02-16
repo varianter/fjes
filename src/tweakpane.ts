@@ -2,7 +2,12 @@ import { Pane } from "tweakpane";
 import type { ListBladeApi } from "tweakpane";
 import type { FolderApi } from "@tweakpane/core";
 import { config, FACE_SIZE, type Config } from "./index.ts";
-import { shapeDefaults, type Shape } from "./features/shapes.ts";
+import {
+  shapeDefaults,
+  shapeFields,
+  type Shape,
+  type FieldDef,
+} from "./features/shapes.ts";
 import type { Group } from "./features/groups.ts";
 import { syncConfigToUrl } from "./url.ts";
 
@@ -40,114 +45,83 @@ const positionOpts = {
   y: { min: -center, max: FACE_SIZE },
 };
 
-const pointOpts = () => ({
-  picker: "inline" as const,
-  expanded: true,
-  step: 1,
-  x: { min: -center, max: center, format: (v: number) => v.toFixed(2) },
-  y: { min: -center, max: center, format: (v: number) => v.toFixed(2) },
-});
-
-// --- Shape bindings ---
+// --- Shape bindings (data-driven from shapeFields) ---
 
 function addShapeBindings(folder: FolderApi, shape: Shape) {
-  switch (shape.type) {
-    case "line":
-      folder.addBinding(shape, "length", { min: 1, max: 50 });
-      folder.addBinding(shape, "rotate", {
-        min: 0,
-        max: 360,
-        format: (v: number) => v.toFixed(0),
-      });
-      break;
-    case "circle":
-      folder.addBinding(shape, "radius", { min: 1, max: 25 });
-      folder.addBinding(shape, "strokeWidth", { min: 1, max: 20 });
-      break;
-    case "dot":
-      folder.addBinding(shape, "size", { min: 1, max: 20 });
-      break;
-    case "curve":
-      for (const key of ["start", "end", "q1", "q2", "q3", "q4"] as const) {
-        folder.addBinding(shape, key, pointOpts());
-      }
-      break;
-    case "wave":
-      folder.addBinding(shape, "width", { min: 1, max: 80 });
-      folder.addBinding(shape, "amplitude", { min: 1, max: 20 });
-      folder.addBinding(shape, "frequency", { min: 1, max: 5, step: 1 });
-      break;
-    case "ushape":
-      folder.addBinding(shape, "width", { min: 1, max: 80 });
-      folder.addBinding(shape, "height", { min: 1, max: 40 });
-      folder.addBinding(shape, "inverted");
-      break;
-    case "triangle":
-      folder.addBinding(shape, "size", { min: 1, max: 20 });
-      break;
-    case "lshape":
-      folder.addBinding(shape, "width", { min: 1, max: 30 });
-      folder.addBinding(shape, "height", { min: 1, max: 30 });
-      folder.addBinding(shape, "mirrored");
-      folder.addBinding(shape, "rotate", {
-        min: 0,
-        max: 360,
-        format: (v: number) => v.toFixed(0),
-      });
-      break;
-    case "dshape":
-      folder.addBinding(shape, "width", { min: 1, max: 30 });
-      folder.addBinding(shape, "depth", { min: 1, max: 30 });
-      folder.addBinding(shape, "rotate", {
-        min: 0,
-        max: 360,
-        format: (v: number) => v.toFixed(0),
-      });
-      break;
+  const fields = shapeFields[shape.type];
+
+  for (const [key, def] of Object.entries(fields) as [string, FieldDef][]) {
+    switch (def.kind) {
+      case "number":
+        folder.addBinding(shape, key as keyof typeof shape, {
+          min: def.min,
+          max: def.max,
+          ...(def.step != null ? { step: def.step } : {}),
+        });
+        break;
+
+      case "boolean":
+        folder.addBinding(shape, key as keyof typeof shape);
+        break;
+
+      case "point":
+        folder.addBinding(shape, key as keyof typeof shape, {
+          picker: "inline" as const,
+          expanded: true,
+          ...(def.step != null ? { step: def.step } : {}),
+          x: {
+            min: def.min,
+            max: def.max,
+            format: (v: number) => v.toFixed(2),
+          },
+          y: {
+            min: def.min,
+            max: def.max,
+            format: (v: number) => v.toFixed(2),
+          },
+        });
+        break;
+    }
   }
 }
 
-// --- Layer folder ---
+// --- Shape section within a group folder ---
 
-function buildLayerFolder(
-  parentFolder: FolderApi,
-  group: Group,
-  layerIndex: number,
-) {
-  const layerFolder = parentFolder.addFolder({
-    title: `Layer ${layerIndex + 1}`,
-    expanded: layerIndex === 0,
+function buildShapeSection(folder: FolderApi, group: Group) {
+  const shapeFolder = folder.addFolder({
+    title: "Shape",
+    expanded: true,
   });
 
-  const typeBlade = layerFolder.addBlade({
+  const typeBlade = shapeFolder.addBlade({
     view: "list",
     label: "type",
     options: shapeTypeOptions,
-    value: group.layers[layerIndex]!.type,
+    value: group.shape.type,
   }) as ListBladeApi<Shape["type"]>;
 
   function buildSettings() {
     // Remove everything after the type blade
-    while (layerFolder.children.length > 1) {
-      layerFolder.remove(
-        layerFolder.children[layerFolder.children.length - 1]!,
+    while (shapeFolder.children.length > 1) {
+      shapeFolder.remove(
+        shapeFolder.children[shapeFolder.children.length - 1]!,
       );
     }
 
-    addShapeBindings(layerFolder, group.layers[layerIndex]!);
+    addShapeBindings(shapeFolder, group.shape);
   }
 
   buildSettings();
 
   typeBlade.on("change", (ev) => {
     const newType = ev.value;
-    if (newType === group.layers[layerIndex]!.type) return;
-    group.layers[layerIndex] = structuredClone(shapeDefaults[newType]);
+    if (newType === group.shape.type) return;
+    group.shape = structuredClone(shapeDefaults[newType]);
     buildSettings();
     render();
   });
 
-  return layerFolder;
+  return shapeFolder;
 }
 
 // --- Group folder ---
@@ -163,8 +137,13 @@ function buildGroupFolder(group: Group, groupIndex: number): FolderApi {
     folder.title = ev.value;
   });
 
-  // Position
+  // Position & rotate (spatial transforms)
   folder.addBinding(group, "position", positionOpts);
+  folder.addBinding(group, "rotate", {
+    min: 0,
+    max: 360,
+    format: (v: number) => v.toFixed(0),
+  });
 
   // Mirror settings
   const mirrorFolder = folder.addFolder({
@@ -178,10 +157,8 @@ function buildGroupFolder(group: Group, groupIndex: number): FolderApi {
   // Depth (parallax intensity)
   folder.addBinding(group, "depth", { min: 0, max: 5, step: 0.5 });
 
-  // Layers
-  for (let i = 0; i < group.layers.length; i++) {
-    buildLayerFolder(folder, group, i);
-  }
+  // Shape
+  buildShapeSection(folder, group);
 
   // Remove group button
   if (config.groups.length > 1) {
@@ -202,11 +179,12 @@ addGroupButton.on("click", () => {
   config.groups.push({
     name: `Group ${config.groups.length + 1}`,
     position: { x: 0, y: 0 },
+    rotate: 0,
     mirrored: false,
     distance: 0,
     blink: false,
     depth: 2,
-    layers: [structuredClone(shapeDefaults.dot)],
+    shape: structuredClone(shapeDefaults.dot),
   });
   rebuildAll();
   render();
